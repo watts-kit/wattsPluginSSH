@@ -30,18 +30,18 @@ func getCredentials(params map[string]interface{}) (publicKey string, credential
 	return
 }
 
-func request(pi l.PluginInput, conf map[string]interface{}, params map[string]interface{}) l.Output {
+func request(pi l.Input) l.Output {
 
-	publicKey, credential := getCredentials(params)
+	publicKey, credential := getCredentials(pi.Params)
 	state := pi.CredentialState
 
 	// prepare for execution
-	remoteCommand := conf["remote_command"].(string)
+	remoteCommand := pi.Conf["remote_command"].(string)
 	remoteScriptParameter := map[string]interface{}{
-		"pub_key": fmt.Sprintf("%s %s_%s", publicKey, conf["prefix"], pi.WaTTSUserID),
+		"pub_key": fmt.Sprintf("%s %s_%s", publicKey, pi.Conf["prefix"], pi.WaTTSUserID),
 		"state":   state,
 	}
-	hostList := getHostList(conf)
+	hostList := getHostList(pi.Conf)
 
 	// execute the remote script for all hosts in the host list
 	hostReplies, err := remoteScript.ExecuteRemoteScriptOnHosts(
@@ -65,14 +65,14 @@ func request(pi l.PluginInput, conf map[string]interface{}, params map[string]in
 	return l.PluginGoodRequest(credential, state)
 }
 
-func revoke(pi l.PluginInput, conf map[string]interface{}, params map[string]interface{}) l.Output {
+func revoke(pi l.Input) l.Output {
 	// prepare for execution
-	remoteCommand := conf["remote_command"].(string)
-	hostList := getHostList(conf)
+	remoteCommand := pi.Conf["remote_command"].(string)
+	hostList := getHostList(pi.Conf)
 
 	// execute the remote script for all hosts in the host list
 	hostReplies, err := remoteScript.ExecuteRemoteScriptOnHosts(
-		remoteCommand, params, hostList)
+		remoteCommand, pi.Params, hostList)
 	l.Check(err, 1, "execution of the remote script on the hosts failed")
 
 	for host, hostReply := range hostReplies {
@@ -89,12 +89,14 @@ func revoke(pi l.PluginInput, conf map[string]interface{}, params map[string]int
 
 func main() {
 	pluginDescriptor := l.PluginDescriptor{
-		Version:       "0.1.0",
-		Author:        "Lukas Burgey @ KIT within the INDIGO DataCloud Project",
-		Name:          "wattsPluginSSH",
-		Description:   "A watts plugin to deploy ssh keys for users",
-		ActionRequest: request,
-		ActionRevoke:  revoke,
+		Version:     "0.1.0",
+		Author:      "Lukas Burgey @ KIT within the INDIGO DataCloud Project",
+		Name:        "wattsPluginSSH",
+		Description: "A watts plugin to deploy ssh keys for users",
+		Actions: map[string]l.Action{
+			"request": request,
+			"revoke":  revoke,
+		},
 		ConfigParams: []l.ConfigParamsDescriptor{
 			l.ConfigParamsDescriptor{Name: "state_prefix", Type: "string", Default: "TTS"},
 			l.ConfigParamsDescriptor{Name: "host_list", Type: "string", Default: ""},
