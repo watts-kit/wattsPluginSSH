@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	l "git.scc.kit.edu/lukasburgey/wattsPluginLib"
-	"git.scc.kit.edu/lukasburgey/wattsPluginLib/sshKeyGen"
 	"git.scc.kit.edu/lukasburgey/wattsPluginLib/remoteScript"
+	"git.scc.kit.edu/lukasburgey/wattsPluginLib/sshKeyGen"
 	"strings"
 )
 
@@ -36,7 +36,7 @@ func request(pi l.PluginInput, conf map[string]interface{}, params map[string]in
 	state := pi.CredentialState
 
 	// prepare for execution
-	remoteCommand := fmt.Sprint(conf["remote_command"])
+	remoteCommand := conf["remote_command"].(string)
 	remoteScriptParameter := map[string]interface{}{
 		"pub_key": fmt.Sprintf("%s %s_%s", publicKey, conf["prefix"], pi.WaTTSUserID),
 		"state":   state,
@@ -67,7 +67,7 @@ func request(pi l.PluginInput, conf map[string]interface{}, params map[string]in
 
 func revoke(pi l.PluginInput, conf map[string]interface{}, params map[string]interface{}) l.Output {
 	// prepare for execution
-	remoteCommand := fmt.Sprint(conf["remote_command"])
+	remoteCommand := conf["remote_command"].(string)
 	hostList := getHostList(conf)
 
 	// execute the remote script for all hosts in the host list
@@ -96,7 +96,7 @@ func main() {
 		ActionRequest: request,
 		ActionRevoke:  revoke,
 		ConfigParams: []l.ConfigParamsDescriptor{
-			l.ConfigParamsDescriptor{Name: "state_prefix", Type: "string", Default: "TTS_"},
+			l.ConfigParamsDescriptor{Name: "state_prefix", Type: "string", Default: "TTS"},
 			l.ConfigParamsDescriptor{Name: "host_list", Type: "string", Default: ""},
 			l.ConfigParamsDescriptor{Name: "remote_command", Type: "string", Default: "sudo /home/tts/.config/tts/ssh_vm.py"},
 		},
