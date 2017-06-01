@@ -19,12 +19,12 @@ func getCredentials(params map[string]interface{}) (publicKey string, credential
 		publicKey = fmt.Sprint(pk)
 		credential = []l.Credential{}
 	} else {
-		privateKey, publicKey, password, err := sshKeyGen.GenerateKey(4096, 16)
+		privateKey, publicKey, password, err := sshKeyGen.GenerateKey(4096, 0)
 		l.Check(err, 1, "ssh keypair generation")
 		credential = []l.Credential{
-			l.Credential{Name: "private key", Type: "string", Value: privateKey},
-			l.Credential{Name: "public key", Type: "string", Value: publicKey},
-			l.Credential{Name: "password", Type: "string", Value: password},
+			l.TextCredential("private key", privateKey),
+			l.TextCredential("public key", publicKey),
+			l.TextCredential("password", password),
 		}
 	}
 	return
@@ -51,7 +51,7 @@ func request(pi l.Input) l.Output {
 	for host, hostReply := range hostReplies {
 		if result, ok := hostReply["result"].(string); ok && result == "ok" {
 			if credentialReply, ok := hostReply["credential"].(l.Credential); ok {
-				credentialReply.Name = credentialReply.Name + " @ " + host
+				credentialReply["name"] = fmt.Sprint(credentialReply["name"], " @ ", host)
 				credential = append(credential, credentialReply)
 				continue
 			}
