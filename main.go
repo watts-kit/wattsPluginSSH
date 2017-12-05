@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	l "github.com/watts-kit/wattsPluginLib"
 )
 
@@ -11,20 +12,26 @@ const (
 
 func request(pi l.Input) l.Output {
 	h := pi.SSHHostListFromConf("host_list")
+
+	// backup the authorized_keys file
 	h.RunSSHCommand("cp", authorizedKeyFile, authorizedKeyFile+".bak")
-// if the user has provided a public key we use it instead of generating a key pair
+
 	publicKey := pi.PublicKeyFromParams("pub_key")
 
 	uid := fmt.Sprintf("%s_%s", pi.Conf["prefix"], pi.WaTTSUserID)
+
+	// prefix the line with options if given
 	var newLine string
 	if options, ok := pi.Params["options"]; ok {
 		newLine = fmt.Sprintf("%s %s %s", options.(string), publicKey, uid)
 	} else {
 		newLine = fmt.Sprintf("%s %s", publicKey, uid)
-}
+	}
 
+	// insert the line into the authorized_keys file
 	h.RunSSHCommand("echo", newLine, ">>", authorizedKeyFile)
 
+	// we return the host we deploy to as a credential
 	credentials := make([]l.Credential, len(h))
 	for i, v := range h {
 		credentials[i] = l.AutoCredential("host", v)
@@ -43,8 +50,8 @@ func revoke(pi l.Input) l.Output {
 
 func main() {
 	pluginDescriptor := l.PluginDescriptor{
-		Version: "1.0.0",
-		Author:      "Lukas Burgey @ KIT within the INDIGO DataCloud Project",
+		Version:        "1.0.0",
+		Author:         "Lukas Burgey @ KIT within the INDIGO DataCloud Project",
 		DeveloperEmail: "ubedv@student.kit.edu",
 		Actions: map[string]l.Action{
 			"request": request,
