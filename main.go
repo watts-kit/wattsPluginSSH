@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	l "git.scc.kit.edu/lukasburgey/wattsPluginLib"
-	"git.scc.kit.edu/lukasburgey/wattsPluginLib/remoteScript"
-	"git.scc.kit.edu/lukasburgey/wattsPluginLib/sshKeyGen"
+	l "github.com/watts-kit/wattsPluginLib"
+	"github.com/watts-kit/wattsPluginLib/remoteScript"
+	"github.com/watts-kit/wattsPluginLib/sshKeyGen"
 	"strings"
 )
 
