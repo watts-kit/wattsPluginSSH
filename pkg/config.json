@@ -1,0 +1,18 @@
+{
+    "pkg" : {
+        "name" : "watts_plugin_ssh",
+        "short_desc" : "WaTTS plugin to deploy ssh public keys. Use at your own risk.",
+        "version" : "1.0.0",
+        "vendor" : "INDIGO-DC",
+        "maintainer" : "KIT/SCC <watts-development@lists.kit.edu>"
+    },
+    "archive": {
+        "targz": "https://github.com/watts-kit/watts_plugin_ssh/archive/1.0.0.tar.gz"
+    },
+    "build": {
+        "bash": [
+            "GOPATH=$PWD GOBIN=$PWD/plugin go get -v",
+            "GOPATH=$PWD GOBIN=$PWD/plugin go build -o plugin/watts_plugin_ssh"
+        ]
+    }
+}
